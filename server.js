@@ -5,8 +5,15 @@ const superagent = require('superagent');
 const cors = require('cors');
 const app = express();
 
+const client = new pg.Client(process.env.DATABASE_URL);
+client.connect();
+
+client.on('error', err => console.error(err));
+
 app.use(cors());
 require('dotenv').config();
+
+app.get('/location', getLocation)
 
 app.get('/weather', getWeather);
 
@@ -16,18 +23,24 @@ app.get('/yelp', getYelp);
 
 const PORT = process.env.PORT || 3000;
 
-app.get('/location', (request, response) => {
+function deleteByLocationId(table, city) {
+  const SQL =  `DELETE from ${table} WHERE location_id=${city};`;
+  return client.query(SQL);
+}
+
+function getLocation(request, response) {
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GOOGLE_API_KEY}`;
   return superagent.get(url)
 
     .then(result => {
       const locationResult = new LocationData (result, request);
-      
-      response.send(locationResult);
+    })      
+      response.send(locationResult)
       console.log(locationResult);
     })
     .catch( error => handleError(error, response));
-});
+}
+
 
 // constructor function for geolocation - called upon inside the request for location
 function LocationData(result, request) {
