@@ -5,14 +5,14 @@ const superagent = require('superagent');
 const cors = require('cors');
 const app = express();
 const pg = require('pg');
-
+require('dotenv').config();
 const client = new pg.Client(process.env.DATABASE_URL);
 client.connect();
 
 client.on('error', err => console.error(err));
 
 app.use(cors());
-require('dotenv').config();
+
 
 app.get('/location', getLocation)
 
@@ -30,11 +30,12 @@ function deleteByLocationId(table, city) {
 }
 
 // constructor function for geolocation - called upon inside the request for location
-function Location(result, request) {
-  this.search_query = request.query.data;
+function Location(query, result) {
+  this.search_query = query;
   this.formatted_query = result.body.results[0].formatted_address,
   this.latitude = result.body.results[0].geometry.location.lat,
   this.longitude = result.body.results[0].geometry.location.lng
+  this.created_at = Date.now();
 }
 
 function getLocation(request, response) {
