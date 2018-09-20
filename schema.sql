@@ -11,5 +11,5 @@ CREATE TABLE IF NOT EXISTS weathers (
   forecast VARCHAR(255),
   time VARCHAR(255),
   created_at BIGINT,
-  location_id INTERGER NOT NULL REFERENCES locations(id)
+  location_id INTEGER NOT NULL REFERENCES locations(id)
 );
